@@ -9,6 +9,3 @@ def generate_random_date():
 list_len = 10
 simple_index = {el: generate_random_date() for el in range(list_len)}
 print simple_index
-
-
-
