@@ -4,7 +4,7 @@ module.exports = (function () {
   const readline = require('readline')
   const stream = require('stream')
   
-  let dbFileName = 'database.txt'
+  let _dbFilename = 'database.txt'
   let _separator = ':'
   let _delimiter = '\n'
 
@@ -17,10 +17,36 @@ module.exports = (function () {
   function _setIndexMap (incomingIndexMap) {
     indexMap = incomingIndexMap
   }
+
+  function write (key, value) {
+    let line = key + _separator + value + _delimiter
+    fs.appendFile('database.txt', line, (err) => {
+      if (err) {
+        throw err
+      }
+      _updateIndex(key, line)
+    })
+  }
+  
+  function read (key, callback) {
+    _indexDatabase(() => {
+      let buf = fs.readFileSync(_dbFilename, 'utf-8')
+      // get the bit offset for the key from our index hashmap
+      let keyIndex = indexMap.get(key)
+      if (!keyIndex) {
+        console.log('Key not found in index map.')
+        return callback()
+      }
+      let eolIndex = buf.indexOf('\n') + 1
+      let keyValue = buf.substr(keyIndex, eolIndex).toString()
+      let value =  keyValue.split(_separator)[1]
+      return callback(value)
+    })
+  }
   
   function _indexDatabase(done) {
-    // return early if already indexed
-    if (_getIndexMap().size > 0) {
+    // return early if index already exists
+    if (indexMap.size > 0) {
       return done()
     }
     // load index from file if exists
@@ -29,9 +55,9 @@ module.exports = (function () {
       if (!err) { 
         return done()
       }
-
+      // no index file found. Do indexing...
       console.log('Indexing database...')
-      let dbContent = fs.readFileSync(path.join(__dirname, dbFileName)).toString()
+      let dbContent = fs.readFileSync(path.join(__dirname, _dbFilename)).toString()
     
       // set up buffer stream for reading lines
       var buffer = new Buffer(dbContent)
@@ -53,42 +79,16 @@ module.exports = (function () {
       })
     })
   }
-  
-  function write (key, value) {
-    let line = key + _separator + value + _delimiter
-    fs.appendFile('database.txt', line, (err) => {
-      if (err) {
-        throw err
-      }
-      console.log('Saved.')
-    })
-  }
-  
-  function read (key, callback) {
-    _indexDatabase(() => {
-      let indexMap = _getIndexMap()
-      let buf = fs.readFileSync(dbFileName, 'utf-8')
-      // get the bit offset for the key from our index hashmap
-      let keyIndex = indexMap.get(key)
-      if (!keyIndex) {
-        console.log('Key not found in index map.')
-        return callback()
-      }
-      let eolIndex = buf.indexOf('\n') + 1
-      let keyValue = buf.substr(keyIndex, eolIndex).toString()
-      let value =  keyValue.split(_separator)[1]
-      return callback(value)
-    })
-  }
-  
-  function _populateDatabase () {
-    for (let index = 0; index < 20; index++) {
-      write(index, Math.random().toString(36).substring(7))
-    }
-  }
 
+  function _updateIndex(key, line) {
+    let dbContent = fs.readFileSync(_dbFilename, 'utf-8').toString()
+    let indexValue = dbContent.lastIndexOf(line)
+    console.log('adding to index:', key, indexValue)
+    indexMap.set(key, indexValue)
+    _saveIndexMapToDisk()
+  }
+  
   function _saveIndexMapToDisk () {
-    let indexMap = _getIndexMap()
     let keys = indexMap.keys()
     let indexMapString = ''
     for (let key of keys) {
@@ -97,7 +97,7 @@ module.exports = (function () {
     fs.writeFileSync('indexMap', indexMapString)
     console.log('Done writing indexMap into file.')
   }
-
+  
   function _readIndexMapFromDisk (done) {
     try {
       let indexMapString = fs.readFileSync(path.join(__dirname, 'indexMap'), 'utf-8').toString()
@@ -117,17 +117,16 @@ module.exports = (function () {
       return console.log('Cannot find index map file on disk.')
     }
   }
-
-  let test = "13"
-  read(test, (value) => {
-    console.log(`value for ${test}:`, value)
-    _saveIndexMapToDisk()
-  })
+  
+  function _populateDatabase () {
+    for (let index = 0; index < 20; index++) {
+      write(index, Math.random().toString(36).substring(7))
+    }
+  }
 
   return {
     read, 
     write
   }
-
 
 })()
