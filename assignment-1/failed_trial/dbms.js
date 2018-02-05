@@ -4,7 +4,7 @@ module.exports = (function () {
   const readline = require('readline')
   const stream = require('stream')
   
-  let _dbFilename = 'database.txt'
+  let _dbFilename = 'js_database'
   let _separator = ':'
   let _delimiter = '\n'
 
@@ -20,7 +20,7 @@ module.exports = (function () {
 
   function write (key, value) {
     let line = key + _separator + value + _delimiter
-    fs.appendFile('database.txt', line, (err) => {
+    fs.appendFile(_dbFilename, line, (err) => {
       if (err) {
         throw err
       }
