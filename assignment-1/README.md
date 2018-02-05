@@ -24,6 +24,8 @@ python3 dbms.py
 
 Running the file will populate the database with random data and read back the value for key `3`. Running the file multiple times will add new data to the database with the same keys (0 -> 9) and hence you can see the index file updating and that the program returns new data for the same key every time.
 
+See the `REVIEWER` section in the python file that you can overwrite to observe different results.
+
 #### Functionality
 
 Data is stored in the `py_database` file. A hash index is being update with the bit offset of the key whenever a new key-value pair is added.
