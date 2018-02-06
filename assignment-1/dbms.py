@@ -15,18 +15,17 @@ def write(key, value):
     db.flush()
   # to index the new key the data has to be appended to the db file
   index_new_key(key)
+  print(key, value)
 
 def read(key):
   get_index()
   value = ''
   with open(db_filename, "r") as f:
-    print('index:', index_store)
-    key = str(key)
-    key_index = int(index_store.get(key) or -1)
+    key_index = int(index_store.get(str(key)) or -1)
     if key_index == -1:
       print('Key index {} not found in index hashmap.'.format(key))
       return
-    print('key index', key_index)
+    # print('Key index found at', key_index)
     f.seek(key_index, 0)
     line = f.readline().strip()
     value = line.split(':')[1]
@@ -84,19 +83,18 @@ def generate_random_data():
     return ''.join(random.sample(chars, 5))
 
 # generate random data to populate database
-for el in range(10):
-  write(el, generate_random_data())
+def populate_database():
+  for el in range(10):
+    write(el, generate_random_data())
 
-print("index hashmap", index_store)
-
-# ---------------------- REVIEWER --------------------------------
-# READ DATA HERE BY KEY:
-my_key = 3
-print('Read from DB:', read(my_key))
-# ---------------------- REVIEWER --------------------------------
-
-
-
+# handle cli arguments
+if len(sys.argv) == 2:
+  arg_key = sys.argv[1]
+  print(read(arg_key))
+elif len(sys.argv) == 3:
+  arg_key = sys.argv[1]
+  arg_val = sys.argv[2]
+  write(arg_key, arg_val)
 
 # IGNORE: useful scripts
 # byte_string = ' '.join(format(ord(x), 'b') for x in line)
