@@ -11,28 +11,34 @@ def write(key, value):
     key = str(key)
     value = str(value)
     line = key + ':' + value + '\n'
-    index_new_key(key)
     db.writelines(line)
     db.flush()
+  # to index the new key the data has to be appended to the db file
+  index_new_key(key)
 
 def read(key):
-  read_index_from_file()
+  get_index()
   value = ''
   with open(db_filename, "r") as f:
-    key_index = index_store.get(key) or 0
-    key_index = int(key_index)
-    f.seek(key_index)
+    print('index:', index_store)
+    key = str(key)
+    key_index = int(index_store.get(key) or -1)
+    if key_index == -1:
+      print('Key index {} not found in index hashmap.'.format(key))
+      return
+    print('key index', key_index)
+    f.seek(key_index, 0)
     line = f.readline().strip()
     value = line.split(':')[1]
   return value
 
 def index_new_key(key):
-  read_index_from_file()
+  get_index()
   with open(db_filename, 'r') as f:
     file_content = f.read()
     index = file_content.rfind('\n' + key + ':')
     if not index == -1:
-      index_store[key] = index + 1 # to reflect the one extra EOL character
+      index_store[key] = index + 1 # to reflect the one extra EOL character \n
   write_index_to_file()
 
 def read_index_from_file():
@@ -58,6 +64,12 @@ def write_index_to_file():
   with open(index_filename, 'wb') as f:
     f.write(index_binary.encode())
     f.flush()
+
+def get_index():
+  if len(index_store) > 0:
+    return
+  else:
+      read_index_from_file()
 
 def text_to_bits(text, encoding='utf-8', errors='surrogatepass'):
     bits = bin(int.from_bytes(text.encode(encoding, errors), 'big'))[2:]
