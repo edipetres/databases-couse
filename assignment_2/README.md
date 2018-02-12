@@ -18,7 +18,7 @@ Run the following script from its directory to get started
 sudo ./setup.sh
 ```
 
-This command will extract the dataset. It spins up a mongo database locally with a data volume mounted to the `data` folder using Docker. Then populate the database with the extracted dataset. Finally, it runs the Python script to analyse the data and prints out the results.g
+This command will extract the dataset. It spins up a mongo database locally with a data volume mounted to the `data` folder using Docker. Then it populates the database with the extracted dataset. Finally, it runs the Python script to analyse the data and prints out the results.
 
 ## Results
 
@@ -75,4 +75,6 @@ Top 5 mad users (negative words found):
 
 ## Notes
 
-The sentiment analysis is not quite sophisticated. We take a list of happy and sad words and compare to each word in the tweets. While some words carry a negative meaning, the tweets might still have a positive attitude as a whole
+The sentiment analysis is not quite sophisticated. We take a list of happy and sad words and compare to each word in the tweets. While some words carry a negative meaning, the tweets might still have a positive attitude as a whole.
+
+I had difficulty appending the id's to the beginning of the dataset (the `sed` command did not work on my machine) hence I kept the zipped training data in the repository.
