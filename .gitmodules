@@ -1,0 +1,3 @@
+[submodule "assignment2"]
+	path = assignment2
+	url = git@github.com:edipetres/databases-course-assignment-2.git
