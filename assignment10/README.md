@@ -6,4 +6,4 @@
 
 ## Physical Data Model
 
-![Physical DM](physical-data-model.jpg)
+![Physical DM](physical-data-model.JPG)
